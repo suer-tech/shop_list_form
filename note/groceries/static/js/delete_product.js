@@ -14,10 +14,10 @@ function deleteProduct(productId) {
             var productToRemove = document.getElementById('product' + productId);
             productToRemove.parentNode.removeChild(productToRemove);
         } else {
-            alert('Failed to delete product');
+            alert('Не удалось удалить продукт');
         }
     })
     .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
+        console.error('Произошла проблема с выполнением запроса:', error);
     });
 }

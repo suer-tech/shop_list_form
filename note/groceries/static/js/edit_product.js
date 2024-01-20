@@ -1,6 +1,6 @@
 function editProduct(productId) {
-    var productName = prompt('Enter new name:');
-    var productQuantity = prompt('Enter new quantity:');
+    var productName = prompt('Введите новое название:');
+    var productQuantity = prompt('Введите новое количество:');
 
     if (productName === null || productQuantity === null) {
         return;
@@ -20,11 +20,11 @@ function editProduct(productId) {
     .then(data => {
         if (data.success) {
             var productElement = document.getElementById('product' + productId);
-            productElement.innerHTML = productName + ' - ' + productQuantity +
-                '<button onclick="editProduct(' + productId + ')">Edit</button>' +
-                '<button onclick="deleteProduct(' + productId + ')">Delete</button>';
+            var innerContainer = productElement.querySelector('.container-fluid .row');
+            innerContainer.children[0].textContent = productName;
+            innerContainer.children[1].textContent = productQuantity;
         } else {
-            alert('Failed to edit product');
+            alert('Не удалось изменить продукт');
         }
     });
 }

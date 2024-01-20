@@ -1,42 +1,46 @@
 function applyFilters() {
-    // Получаем URL из data-атрибута
     var filterUrl = document.getElementById('applyFiltersButton').dataset.filterUrl;
-
-    // Получаем значения фильтров
     var filterName = document.getElementById('filterName').value;
     var sortBy = document.getElementById('sortBy').value;
     var sortOrder = document.getElementById('sortOrder').value;
 
-    // Строим URL с учетом фильтров
     filterUrl += '?filterName=' + encodeURIComponent(filterName) + '&sortBy=' + encodeURIComponent(sortBy) + '&sortOrder=' + encodeURIComponent(sortOrder);
 
-    // Выполняем AJAX-запрос
     fetch(filterUrl)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 var productList = document.getElementById('productList');
-                productList.innerHTML = '';  // Очищаем текущий список продуктов
+                var existingColumnHeader = productList.querySelector('.list-group-item:first-child');
+                productList.innerHTML = '';
+                productList.appendChild(existingColumnHeader);
 
                 data.products.forEach(product => {
                     var newProduct = document.createElement('li');
+                    newProduct.className = 'list-group-item';
                     newProduct.id = 'product' + product.id;
-                    newProduct.innerHTML = product.name + ' - ' + product.quantity +
-                        '<button onclick="editProduct(' + product.id + ')">Edit</button>' +
-                        '<button onclick="deleteProduct(' + product.id + ')">Delete</button>';
+                    newProduct.innerHTML = '<div class="container-fluid">' +
+                        '<div class="row">' +
+                        '<div class="col-md-6">' + product.name + '</div>' +
+                        '<div class="col-md-4">' + product.quantity + '</div>' +
+                        '<div class="col-md-2 d-flex justify-content-end">' +
+                        '<button onclick="editProduct(' + product.id + ')" class="btn btn-secondary mx-1">Изменить</button>' +
+                        '<button onclick="deleteProduct(' + product.id + ')" class="btn btn-danger mx-1">Удалить</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
                     productList.appendChild(newProduct);
                 });
             } else {
-                alert('Failed to apply filters');
+                alert('Не удалось применить фильтры');
             }
         })
         .catch(error => {
-            console.error('Error during fetch:', error);
+            console.error('Ошибка при выполнении запроса:', error);
         });
 }
 
-// Добавляем обработчик события на кнопку для выполнения функции без перезагрузки страницы
 document.getElementById('applyFiltersButton').addEventListener('click', function(event) {
-    event.preventDefault();  // Предотвращаем стандартное действие кнопки (например, отправку формы)
-    applyFilters();  // Вызываем функцию фильтрации
+    event.preventDefault();
+    applyFilters();
 });
