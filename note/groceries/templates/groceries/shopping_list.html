@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="col-md-2 mb-3">
-                    <button type="button" class="btn btn-primary btn-block" onclick="applyFilters()">Применить</button>
+                    <button id="applyFiltersButton" data-filter-url="{% url 'filter_products' %}">Применить</button>
                 </div>
             </div>
         </form>
@@ -93,117 +93,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function addProduct() {
-            var nameInput = document.getElementById('name');
-            var quantityInput = document.getElementById('quantity');
-
-            var formData = new FormData();
-            formData.append('name', nameInput.value);
-            formData.append('quantity', quantityInput.value);
-
-            var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-
-            fetch('{% url "add_product" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                },
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    var productList = document.getElementById('productList');
-                    var newProduct = document.createElement('li');
-                    newProduct.id = 'product' + data.product_id;
-                    newProduct.innerHTML = nameInput.value + ' - ' + quantityInput.value +
-                        '<button onclick="editProduct(' + data.product_id + ')">Edit</button>' +
-                        '<button onclick="deleteProduct(' + data.product_id + ')">Delete</button>';
-                    productList.appendChild(newProduct);
-
-                    nameInput.value = '';
-                    quantityInput.value = 1;
-
-                } else {
-                    alert('Failed to add product');
-                }
-            });
-        }
-
-        function editProduct(productId) {
-            var productName = prompt('Enter new name:');
-            var productQuantity = prompt('Enter new quantity:');
-
-            if (productName === null || productQuantity === null) {
-                return;
-            }
-
-            var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-
-            fetch('{% url "edit_product" product_id=0 %}'.replace('0', productId), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: 'name=' + encodeURIComponent(productName) + '&quantity=' + encodeURIComponent(productQuantity),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    var productElement = document.getElementById('product' + productId);
-                    productElement.innerHTML = productName + ' - ' + productQuantity +
-                        '<button onclick="editProduct(' + productId + ')">Edit</button>' +
-                        '<button onclick="deleteProduct(' + productId + ')">Delete</button>';
-                } else {
-                    alert('Failed to edit product');
-                }
-            });
-        }
-
-        function deleteProduct(productId) {
-            fetch('/delete/' + productId + '/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    var productToRemove = document.getElementById('product' + productId);
-                    productToRemove.parentNode.removeChild(productToRemove);
-                } else {
-                    alert('Failed to delete product');
-                }
-            });
-        }
-
-        function applyFilters() {
-            var filterName = document.getElementById('filterName').value;
-            var sortBy = document.getElementById('sortBy').value;
-            var sortOrder = document.getElementById('sortOrder').value;
-
-            fetch('{% url "filter_products" %}?filterName=' + filterName + '&sortBy=' + sortBy + '&sortOrder=' + sortOrder)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        var productList = document.getElementById('productList');
-                        productList.innerHTML = '';  // Clear existing products
-
-                        data.products.forEach(product => {
-                            var newProduct = document.createElement('li');
-                            newProduct.id = 'product' + product.id;
-                            newProduct.innerHTML = product.name + ' - ' + product.quantity +
-                                '<button onclick="deleteProduct(' + product.id + ')">Delete</button>';
-                            productList.appendChild(newProduct);
-                        });
-                    } else {
-                        alert('Failed to apply filters');
-                    }
-                });
-        }
-
+    var addProductUrl = "{% url 'add_product' %}";
+    var editProductUrl = '{% url "edit_product" product_id=0 %}';
+    var filterUrl = document.getElementById('filterUrl').dataset.filterUrl;
     </script>
+    <script src="{% static 'js/add_product.js' %}"></script>
+    <script src="{% static 'js/edit_product.js' %}"></script>
+    <script src="{% static 'js/delete_product.js' %}"></script>
+    <script src="{% static 'js/apply_filter.js' %}"></script>
+
 {% endblock %}
